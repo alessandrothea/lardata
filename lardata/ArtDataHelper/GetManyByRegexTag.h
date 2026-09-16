@@ -49,7 +49,7 @@ namespace lar {
      */
     template<typename T>
     std::vector<art::Handle<T>>
-    getManyByRegexTag(art::Event& e, const art::InputTag& tag)
+    getManyByRegexTag(const art::Event& e, const art::InputTag& tag)
     {
       std::regex instance_regex(!tag.instance().empty() ? tag.instance() : ".*");
       std::regex label_regex   (!tag.label()   .empty() ? tag.label()    : ".*");
