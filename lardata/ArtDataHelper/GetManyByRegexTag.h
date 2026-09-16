@@ -1,8 +1,8 @@
 /// @file  GetManyByRegexTag.h
 /// @brief Utility to retrieve art data products whose input tags match a regex pattern.
 
-#ifndef LARDATA_LARDATA_ARTDATAHELPERS_GETMANYBYREGEXTAG_H
-#define LARDATA_LARDATA_ARTDATAHELPERS_GETMANYBYREGEXTAG_H
+#ifndef LARDATA_LARDATA_ARTDATAHELPER_GETMANYBYREGEXTAG_H
+#define LARDATA_LARDATA_ARTDATAHELPER_GETMANYBYREGEXTAG_H
 
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
@@ -75,4 +75,4 @@ namespace lar {
   }   // namespace util
 } // namespace lar
 
-#endif // LARDATA_LARDATA_ARTDATAHELPERS_GETMANYBYREGEXTAG_HH
+#endif // LARDATA_LARDATA_ARTDATAHELPER_GETMANYBYREGEXTAG_HH
