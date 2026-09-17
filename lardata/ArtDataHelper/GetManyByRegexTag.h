@@ -4,10 +4,6 @@
 #ifndef LARDATA_LARDATA_ARTDATAHELPER_GETMANYBYREGEXTAG_H
 #define LARDATA_LARDATA_ARTDATAHELPER_GETMANYBYREGEXTAG_H
 
-#include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Framework/Principal/Selector.h"
-#include "canvas/Persistency/Provenance/BranchDescription.h"
 #include "canvas/Utilities/InputTag.h"
 
 #include <regex>
@@ -26,49 +22,47 @@ namespace lar {
      * @brief  Retrieve all data products of type `T` whose input tags match a
      *         regex pattern.
      *
+     * Works with both `art::Event` and `gallery::Event`.
+     *
      * Each field of @p tag (label, instance, process) is interpreted as a
-     * `std::regex` pattern.  An empty field acts as the wildcard `".*"` and
-     * matches any value.  All three fields must match for a product to be
-     * selected.
+     * `std::regex` pattern. An empty field matches any value. All three
+     * fields must match for a product to be selected.
      *
-     * @tparam T      The data-product type to retrieve (e.g. `recob::Hit`).
-     * @param  e      The current art event.
-     * @param  tag    An `art::InputTag` whose fields are treated as regex
-     *                patterns rather than literal strings.
-     * @return        A vector of valid `art::Handle<T>` for every matching
-     *                product in the event.
-     * @throws std::runtime_error  If no products of type `T` match the given
-     *                             pattern.
+     * @tparam T    The data-product type (e.g. `std::vector<recob::Hit>`).
+     * @tparam Evt  `art::Event` or `gallery::Event` (deduced).
+     * @param  e    The event.
+     * @param  tag  An `art::InputTag` whose fields are regex patterns.
+     * @return      Valid handles for every matching product.
+     * @throws std::runtime_error  If no product of type `T` matches.
+     * @throws std::regex_error    If a field is not a valid regex.
      *
-     * ### Example
-     * @code
-     * // Retrieve all recob::Hit collections whose label starts with "gauss".
-     * auto handles = lar::util::getManyByRegexTag<recob::Hit>(
-     *     event, art::InputTag{"gauss.*", "", ""});
-     * @endcode
+     * In an art module, declare `consumesMany<T>()` in the constructor.
      */
-    template<typename T>
-    std::vector<art::Handle<T>>
-    getManyByRegexTag(const art::Event& e, const art::InputTag& tag)
+    template<typename T, typename Evt>
+    std::vector<typename Evt::template HandleT<T>>
+    getManyByRegexTag(Evt const& e, art::InputTag const& tag)
     {
-      std::regex instance_regex(!tag.instance().empty() ? tag.instance() : ".*");
-      std::regex label_regex   (!tag.label()   .empty() ? tag.label()    : ".*");
-      std::regex process_regex (!tag.process() .empty() ? tag.process()  : ".*");
+      std::regex instance_re(!tag.instance().empty() ? tag.instance() : ".*");
+      std::regex label_re   (!tag.label()   .empty() ? tag.label()    : ".*");
+      std::regex process_re (!tag.process() .empty() ? tag.process()  : ".*");
 
-      art::SelectorByFunction selector(
-        [instance_regex, label_regex, process_regex](art::BranchDescription const& p) {
-          return std::regex_match(p.inputTag().label(),    label_regex)
-              & std::regex_match(p.inputTag().instance(), instance_regex)
-              & std::regex_match(p.inputTag().process(),  process_regex);
-        },
-        "InputTag Regex Selector"
-      );
+      std::vector<typename Evt::template HandleT<T>> handles;
+      for (art::InputTag const& t : e.template getInputTags<T>()) {
+        if (!std::regex_match(t.label(),    label_re)    ||
+            !std::regex_match(t.instance(), instance_re) ||
+            !std::regex_match(t.process(),  process_re))
+          continue;
 
-      auto handles = e.getMany<T>(selector);
+        auto handle = e.template getHandle<T>(t);
+        if (handle.isValid()) handles.push_back(std::move(handle));
+      }
+
       if (handles.empty()) {
         throw std::runtime_error(
-          "No " + std::string(typeid(T).name()) +
-          " collections matching " + tag.instance() + "_" + tag.label());
+          "No " + art::TypeID{typeid(T)}.className()
+          + " products matching label='"  + tag.label()
+          + "' instance='" + tag.instance()
+          + "' process='"  + tag.process() + "'");
       }
       return handles;
     }
