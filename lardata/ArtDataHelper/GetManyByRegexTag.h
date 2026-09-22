@@ -38,19 +38,19 @@ namespace lar {
      *
      * In an art module, declare `consumesMany<T>()` in the constructor.
      */
-    template<typename T, typename Evt>
-    std::vector<typename Evt::template HandleT<T>>
-    getManyByRegexTag(Evt const& e, art::InputTag const& tag)
+    template <typename T, typename Evt>
+    std::vector<typename Evt::template HandleT<T>> getManyByRegexTag(Evt const& e,
+                                                                     art::InputTag const& tag)
     {
       std::regex instance_re(!tag.instance().empty() ? tag.instance() : ".*");
-      std::regex label_re   (!tag.label()   .empty() ? tag.label()    : ".*");
-      std::regex process_re (!tag.process() .empty() ? tag.process()  : ".*");
+      std::regex label_re(!tag.label().empty() ? tag.label() : ".*");
+      std::regex process_re(!tag.process().empty() ? tag.process() : ".*");
 
       std::vector<typename Evt::template HandleT<T>> handles;
       for (art::InputTag const& t : e.template getInputTags<T>()) {
-        if (!std::regex_match(t.label(),    label_re)    ||
+        if (!std::regex_match(t.label(), label_re) ||
             !std::regex_match(t.instance(), instance_re) ||
-            !std::regex_match(t.process(),  process_re))
+            !std::regex_match(t.process(), process_re))
           continue;
 
         auto handle = e.template getHandle<T>(t);
@@ -58,15 +58,13 @@ namespace lar {
       }
 
       if (handles.empty()) {
-        throw std::runtime_error(
-          "No " + art::TypeID{typeid(T)}.className()
-          + " products matching label='"  + tag.label()
-          + "' instance='" + tag.instance()
-          + "' process='"  + tag.process() + "'");
+        throw std::runtime_error("No " + art::TypeID{typeid(T)}.className() +
+                                 " products matching label='" + tag.label() + "' instance='" +
+                                 tag.instance() + "' process='" + tag.process() + "'");
       }
       return handles;
     }
-  }   // namespace util
+  } // namespace util
 } // namespace lar
 
 #endif // LARDATA_LARDATA_ARTDATAHELPER_GETMANYBYREGEXTAG_HH
