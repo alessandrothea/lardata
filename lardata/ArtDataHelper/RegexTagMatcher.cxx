@@ -7,7 +7,7 @@ namespace lar::util::detail {
 
   bool RegexTagMatcher::match(art::InputTag const& tag) const
   {
-    
+
     std::regex instance_re(!tag.instance().empty() ? tag.instance() : ".*");
     std::regex label_re(!tag.label().empty() ? tag.label() : ".*");
     std::regex process_re(!tag.process().empty() ? tag.process() : ".*");

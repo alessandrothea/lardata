@@ -2,7 +2,6 @@
 #ifndef LARDATA_LARDATA_ARTDATAHELPER_REGEXTAGMATCHER_H
 #define LARDATA_LARDATA_ARTDATAHELPER_REGEXTAGMATCHER_H
 
-
 #include "canvas/Utilities/InputTag.h"
 
 namespace lar::util::detail {
@@ -11,6 +10,7 @@ namespace lar::util::detail {
     explicit RegexTagMatcher(art::InputTag const&);
 
     bool match(art::InputTag const&) const;
+
   private:
     art::InputTag fRegexTag;
   };
