@@ -27,7 +27,7 @@
 #include "canvas/Utilities/InputTag.h"
 
 // C/C++ standard libraries
-#include <regex>  // std::regex_error
+#include <regex> // std::regex_error
 #include <set>
 #include <string>
 #include <utility> // std::move
@@ -64,10 +64,7 @@ namespace {
     template <typename T>
     using HandleT = MockHandle<T>;
 
-    void add(art::InputTag tag, bool valid = true)
-    {
-      products_.push_back({std::move(tag), valid});
-    }
+    void add(art::InputTag tag, bool valid = true) { products_.push_back({std::move(tag), valid}); }
 
     template <typename T>
     std::vector<art::InputTag> getInputTags() const
@@ -110,11 +107,11 @@ namespace {
   MockEvent makeEvent()
   {
     MockEvent e;
-    e.add({"gaushit", "", "reco1"});       // 0
-    e.add({"gaushit", "", "reco2"});       // 1
-    e.add({"gaushitStage2", "", "reco1"}); // 2
-    e.add({"fasthit", "", "reco1"});       // 3
-    e.add({"gaushit", "uncalib", "reco1"});// 4
+    e.add({"gaushit", "", "reco1"});                        // 0
+    e.add({"gaushit", "", "reco2"});                        // 1
+    e.add({"gaushitStage2", "", "reco1"});                  // 2
+    e.add({"fasthit", "", "reco1"});                        // 3
+    e.add({"gaushit", "uncalib", "reco1"});                 // 4
     e.add({"brokenhit", "", "reco1"}, /* valid = */ false); // 5: filtered out
     return e;
   }
@@ -132,10 +129,10 @@ BOOST_AUTO_TEST_CASE(EmptyTagMatchesEveryValidProduct)
 
   BOOST_TEST(handles.size() == 5u);
   std::set<std::string> const expected{"gaushit::reco1",
-                                        "gaushit::reco2",
-                                        "gaushitStage2::reco1",
-                                        "fasthit::reco1",
-                                        "gaushit:uncalib:reco1"};
+                                       "gaushit::reco2",
+                                       "gaushitStage2::reco1",
+                                       "fasthit::reco1",
+                                       "gaushit:uncalib:reco1"};
   BOOST_TEST((selected(handles) == expected));
 }
 
@@ -146,12 +143,9 @@ BOOST_AUTO_TEST_CASE(LabelExactMatchIsAnchored)
 
   // std::regex_match is a *full* match: "gaushit" must NOT select
   // "gaushitStage2".
-  auto const handles =
-    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"gaushit", "", ""});
+  auto const handles = lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"gaushit", "", ""});
 
-  std::set<std::string> const expected{"gaushit::reco1",
-                                        "gaushit::reco2",
-                                        "gaushit:uncalib:reco1"};
+  std::set<std::string> const expected{"gaushit::reco1", "gaushit::reco2", "gaushit:uncalib:reco1"};
   BOOST_TEST((selected(handles) == expected));
 }
 
@@ -160,14 +154,11 @@ BOOST_AUTO_TEST_CASE(LabelWildcardMatch)
 {
   auto const e = makeEvent();
 
-  auto const handles =
-    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"gaushit.*", "", ""});
+  auto const handles = lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"gaushit.*", "", ""});
 
   // Now "gaushitStage2" is included as well; "fasthit" still is not.
-  std::set<std::string> const expected{"gaushit::reco1",
-                                        "gaushit::reco2",
-                                        "gaushitStage2::reco1",
-                                        "gaushit:uncalib:reco1"};
+  std::set<std::string> const expected{
+    "gaushit::reco1", "gaushit::reco2", "gaushitStage2::reco1", "gaushit:uncalib:reco1"};
   BOOST_TEST((selected(handles) == expected));
 }
 
@@ -177,8 +168,7 @@ BOOST_AUTO_TEST_CASE(InstanceFilter)
   auto const e = makeEvent();
 
   // Only the product carrying a (non-empty) matching instance is selected.
-  auto const handles =
-    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"", "uncalib", ""});
+  auto const handles = lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"", "uncalib", ""});
 
   std::set<std::string> const expected{"gaushit:uncalib:reco1"};
   BOOST_TEST((selected(handles) == expected));
@@ -189,8 +179,7 @@ BOOST_AUTO_TEST_CASE(ProcessFilter)
 {
   auto const e = makeEvent();
 
-  auto const handles =
-    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"", "", "reco2"});
+  auto const handles = lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"", "", "reco2"});
 
   std::set<std::string> const expected{"gaushit::reco2"};
   BOOST_TEST((selected(handles) == expected));
@@ -202,8 +191,8 @@ BOOST_AUTO_TEST_CASE(AllThreeFieldsMustMatch)
   auto const e = makeEvent();
 
   // label "gaushit" (anchored) AND process "reco1".
-  auto const handles = lar::util::getManyByRegexTag<MyProd>(
-    e, art::InputTag{"gaushit", "", "reco1"});
+  auto const handles =
+    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"gaushit", "", "reco1"});
 
   std::set<std::string> const expected{"gaushit::reco1", "gaushit:uncalib:reco1"};
   BOOST_TEST((selected(handles) == expected));
@@ -215,8 +204,7 @@ BOOST_AUTO_TEST_CASE(InvalidHandlesAreFilteredOut)
   auto const e = makeEvent();
 
   // "brokenhit" matches the pattern but its handle is invalid => dropped.
-  auto const handles =
-    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"brokenhit", "", ""});
+  auto const handles = lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"brokenhit", "", ""});
 
   BOOST_TEST(handles.empty());
 }
@@ -231,8 +219,8 @@ BOOST_AUTO_TEST_CASE(NoMatchReturnsEmpty)
   // vector instead. This test pins the *actual* behavior. If the intended
   // contract is to throw, change this to BOOST_CHECK_THROW and fix the
   // implementation accordingly.
-  auto const handles = lar::util::getManyByRegexTag<MyProd>(
-    e, art::InputTag{"does_not_exist", "", ""});
+  auto const handles =
+    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"does_not_exist", "", ""});
 
   BOOST_TEST(handles.empty());
 }
@@ -243,9 +231,8 @@ BOOST_AUTO_TEST_CASE(InvalidRegexThrows)
   auto const e = makeEvent();
 
   // An unbalanced bracket is not a valid std::regex.
-  BOOST_CHECK_THROW(
-    lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"[", "", ""}),
-    std::regex_error);
+  BOOST_CHECK_THROW(lar::util::getManyByRegexTag<MyProd>(e, art::InputTag{"[", "", ""}),
+                    std::regex_error);
 }
 
 //------------------------------------------------------------------------------
