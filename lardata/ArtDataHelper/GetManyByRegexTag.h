@@ -33,7 +33,6 @@ namespace lar {
      * @param  e    The event.
      * @param  tag  An `art::InputTag` whose fields are regex patterns.
      * @return      Valid handles for every matching product.
-     * @throws std::runtime_error  If no product of type `T` matches.
      * @throws std::regex_error    If a field is not a valid regex.
      *
      * In an art module, declare `consumesMany<T>()` in the constructor.
